@@ -1,4 +1,4 @@
-const {createPost, getAllPosts, getPostfromDB, updatePostInDB, deletePostInDB, deleteAnyPostInDB} = require("../models/Post.js");
+const {createPost, getAllPosts, getPostfromDB, updatePostInDB, deletePostInDB, deleteAnyPostInDB, getMyPosts} = require("../models/Post.js");
 const AppError = require("../utils/AppError.js");
 
 const create = async ({id} , {content}) => {
@@ -15,7 +15,7 @@ const getPost = async (id) => {
     }
 
     const response = await getPostfromDB(id);
-    if(response[0].length <= 0){
+    if(response.length <= 0){
         throw new AppError('Post Not found', 404);
     }
     return response;
@@ -49,6 +49,7 @@ const update = async (userId, postId, content, isAppend) => {
 
 
 const getMinePosts = async (userId) => {
+    console.log("Get Mine POsts method is called")
     if(!userId){
         throw new AppError('Unauthorized Access', 401);
     }

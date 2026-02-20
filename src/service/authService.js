@@ -45,5 +45,8 @@ const login = async ({email, password}) => {
     return token;
 }
 
+const logout = async (user) => {
+    
+}
 
-module.exports = {register, login}
+module.exports = {register, login, logout}

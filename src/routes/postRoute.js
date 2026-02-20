@@ -7,10 +7,13 @@ const router = express.Router();
 
 //Users
 router.post('/', validate(['content']), postBlog);
-router.get('/', getPosts);
+
+router.get('/feed', getPosts);
+router.get('/mine', getMinePosts);
+
 router.get('/:postId', getSinglePost);
 router.put('/:postId', validate(['content']), updatePost);
-router.get('/mine', getMinePosts);
+ 
 router.delete('/:postId', deletePost);
 
 //comments

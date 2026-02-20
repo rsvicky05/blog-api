@@ -2,13 +2,13 @@ const jwt = require('jsonwebtoken');
 
 const checkToken = async (req, res, next) => {
     try{
-        const auth = req.headers.authorization;
+        const token = req.cookies.token;
 
-        if(!auth || !auth.startsWith('Bearer')){
+        if(!token){
             return res.status(401).send("Unauthorized Access");
         }
 
-        const token  = auth.split(' ')[1];
+        //const token  = auth.split(' ')[1];
 
         const verified = await jwt.verify(token, process.env.SECRET_KEY)
         
