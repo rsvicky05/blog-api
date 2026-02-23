@@ -5,11 +5,16 @@ const createUser = async (first_name, last_name, email, password, role) => {
         [first_name, last_name, email, password, role]);
 
     console.log(result)
-    return {id: result.insertId, email}
+    return {id: result.insertId, email};
 } 
 
 const findByEmail = async (email) => {
     const [row] = await pool.query(`SELECT * FROM users WHERE email = ?`, [email])
-    return row[0]
+    return row[0];
 }
-module.exports = {createUser, findByEmail}
+
+const storeInDB = async (id, token, expiration) => {
+    const [row] = await pool.query(`INSERT INTO refresh_tokens (user_id, token, expires_at) VALUES (?, ?, FROM_UNIXTIME(?));`, [id, token, expiration]);
+    return row[0];
+}
+module.exports = {createUser, findByEmail, storeInDB}

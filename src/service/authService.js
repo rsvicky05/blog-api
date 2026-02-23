@@ -1,6 +1,8 @@
 const bcrypt = require('bcrypt')
-const {findByEmail, createUser} = require('../models/User');
+const {findByEmail, createUser, storeInDB} = require('../models/User');
 const generateToken = require('../utils/generateToken');
+const {pool} = require('../config/db')
+const jwt = require('jsonwebtoken')
 const AppError = require('../utils/AppError');
 
 const register = async ({first_name, last_name, email, password, role}) => {
@@ -24,9 +26,10 @@ const register = async ({first_name, last_name, email, password, role}) => {
         'user'
     )
     
-    const token = generateToken(user.id, user.role);
+    const accessToken = generateToken.generateAccessToken(user.id, user.role);
+    const refreshToken = generateToken.generateRefreshToken(user.id, user.role);
 
-    return token;  
+    return {accessToken, refreshToken};  
 }
 
 const login = async ({email, password}) => {
@@ -41,12 +44,35 @@ const login = async ({email, password}) => {
         throw new AppError("Unauthorized Access!!", 401);
     }
     
-    const token = await generateToken(userInfo.id, userInfo.role);
-    return token;
+    const accessToken = generateToken.generateAccessToken(userInfo.id, userInfo.role);
+    const refreshToken = generateToken.generateRefreshToken(userInfo.id, userInfo.role);
+
+    const decoded = jwt.decode(refreshToken);
+
+    const response = await storeInDB(userInfo.id, refreshToken, decoded.exp);
+
+    return {accessToken, refreshToken};
 }
 
 const logout = async (user) => {
     
 }
 
-module.exports = {register, login, logout}
+const handleRefreshToken = async (token) => {
+    if(!token){
+        throw new AppError("Refresh token not present", 403);
+    }
+
+    const [isPresent] = await pool.query(`SELECT * FROM refresh_tokens WHERE token = ?`, [token])
+
+    if(isPresent.length === 0){
+        throw new AppError("Invalid refresh token", 403)
+    }
+
+    const decoded = jwt.verify(token, process.env.REFRESH_SECRET_KEY);
+
+    const newAccessToken = generateToken.generateAccessToken(decoded.id, decoded.role)
+
+    return newAccessToken;
+}
+module.exports = {register, login, logout, handleRefreshToken}

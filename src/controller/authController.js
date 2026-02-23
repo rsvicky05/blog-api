@@ -1,4 +1,5 @@
-const {register, login, logout} = require('../service/authService');
+const {register, login, logout, handleRefreshToken} = require('../service/authService');
+const {pool} = require('../config/db')
 
 const registerUser = async (req, res, next) => {
     try{
@@ -14,11 +15,18 @@ const loginUser = async (req, res, next) => {
     try{
         const token = await login(req.body)
 
-        res.cookie('token', token, {
+        res.cookie('accessToken', token.accessToken, {
             httpOnly: true,
             secure: false,
             sameSite: 'Strict',
             maxAge: 60 * 60 * 1000
+        })
+
+        res.cookie('refreshToken', token.refreshToken, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'Strict',
+            maxAge: 24 * 60 * 60 * 1000
         })
 
         res.status(200).send({token, message: "Logged In successfully"})
@@ -29,14 +37,39 @@ const loginUser = async (req, res, next) => {
 
 const logoutUser = async (req, res, next) => {
     try{
-        res.cookie('token', '', {
+        const refreshToken = req.cookies.refreshToken;
+
+        const [rows] = await pool.query(
+        `DELETE FROM refresh_tokens WHERE token = ?`,
+        [refreshToken]
+        );
+        console.log(rows.affectedRows)
+        res.cookie('accessToken', '', {
             httpOnly: true,
             expires: new Date(0)
         })
+
+        res.clearCookie('refreshToken');
+        
         res.status(200).send({message: "Logged Out Successfully"})
     }catch(err){
         next(err)
     }
 }
 
-module.exports = {registerUser, loginUser, logoutUser};
+const refreshTokenHandler = async (req, res, next) => {
+    try{
+        const response = await handleRefreshToken(req.cookies.refreshToken);
+        res.cookie("accessToken", response, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'Strict',
+            maxAge: 15 * 1000
+        })
+        res.status(200).send("New Token is Generated")
+    }catch(err){
+        next(err)
+    }
+}
+
+module.exports = {registerUser, loginUser, logoutUser, refreshTokenHandler};
