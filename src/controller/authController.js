@@ -4,6 +4,19 @@ const {pool} = require('../config/db')
 const registerUser = async (req, res, next) => {
     try{
         const token = await register(req.body);
+        res.cookie('accessToken', token.accessToken, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'Strict',
+            maxAge: 60 * 60 * 1000
+        })
+
+        res.cookie('refreshToken', token.refreshToken, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'Strict',
+            maxAge: 24 * 60 * 60 * 1000
+        })
         res.status(201).json({token, message: "User Registered Successfully"});
     }catch(err){
         next(err)
@@ -38,12 +51,8 @@ const loginUser = async (req, res, next) => {
 const logoutUser = async (req, res, next) => {
     try{
         const refreshToken = req.cookies.refreshToken;
-
-        const [rows] = await pool.query(
-        `DELETE FROM refresh_tokens WHERE token = ?`,
-        [refreshToken]
-        );
-        console.log(rows.affectedRows)
+        const rows = await logout(refreshToken);
+        
         res.cookie('accessToken', '', {
             httpOnly: true,
             expires: new Date(0)
@@ -64,7 +73,7 @@ const refreshTokenHandler = async (req, res, next) => {
             httpOnly: true,
             secure: false,
             sameSite: 'Strict',
-            maxAge: 15 * 1000
+            maxAge: 60 * 60 * 1000
         })
         res.status(200).send("New Token is Generated")
     }catch(err){
@@ -72,4 +81,12 @@ const refreshTokenHandler = async (req, res, next) => {
     }
 }
 
-module.exports = {registerUser, loginUser, logoutUser, refreshTokenHandler};
+const oAuthLogin = async (req, res, next) =>{
+    try{
+        res.send("OAuth Login Page")
+    }catch(err){
+        next(err)
+    }
+}
+
+module.exports = {registerUser, loginUser, logoutUser, refreshTokenHandler, oAuthLogin};

@@ -1,15 +1,15 @@
 const {pool} = require('../config/db');
 
-const createPost = async (id, content) => {
-    const res = await pool.query(`INSERT INTO posts (user_id, content) VALUES(? ,?)`,
-        [id, content]
+const createPost = async (id, title, content) => {
+    const res = await pool.query(`INSERT INTO posts (user_id, title, content) VALUES(? , ?, ?)`,
+        [id, title, content]
     );
     return res;
 }
 
 const getAllPosts = async () => {
     const res = await pool.query(`SELECT content FROM posts`);
-    return res;
+    return res[0];
 }
 
 const getPostfromDB = async (id) => {

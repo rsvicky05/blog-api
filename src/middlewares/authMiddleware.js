@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const AppError = require('../utils/AppError');
 
 const checkToken = async (req, res, next) => {
     try{
@@ -8,18 +9,15 @@ const checkToken = async (req, res, next) => {
             return res.status(401).send("Unauthorized Access");
         }
 
-        //const token  = auth.split(' ')[1];
-
-        const verified = await jwt.verify(token, process.env.SECRET_KEY)
+        const verified = await jwt.verify(token, process.env.SECRET_KEY);
         
         req.user = verified;
         next();
-
     }catch(err){
         if(err.name === "TokenExpiredError"){
-            return res.status(401).send("Session Expired");
+            throw new AppError("Session Expired", 401);
         }
-        return res.status(401).send("Unauthorized Access");
+        throw new AppError("Unauthorized Access", 401);
     }
 }
 

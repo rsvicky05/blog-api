@@ -4,12 +4,14 @@ const generateToken = require('../utils/generateToken');
 const {pool} = require('../config/db')
 const jwt = require('jsonwebtoken')
 const AppError = require('../utils/AppError');
+const sendMail = require('../utils/mailSender');
+const send = require('../utils/mailSender');
 
 const register = async ({first_name, last_name, email, password, role}) => {
     const existing = await findByEmail(email);
 
     if(existing){
-        throw new AppError("User already registered", 400);
+        throw new AppError("User already registered", 409);
     }
 
     if(role && role === "admin"){
@@ -29,6 +31,11 @@ const register = async ({first_name, last_name, email, password, role}) => {
     const accessToken = generateToken.generateAccessToken(user.id, user.role);
     const refreshToken = generateToken.generateRefreshToken(user.id, user.role);
 
+    const decoded = jwt.decode(refreshToken);
+    const response = await storeInDB(user.id, refreshToken, decoded.exp);
+
+    sendMail(email, "Registered Succesfully", "Thank you for registering to our website!!!.")
+
     return {accessToken, refreshToken};  
 }
 
@@ -36,26 +43,32 @@ const login = async ({email, password}) => {
     const userInfo = await findByEmail(email);
 
     if(!userInfo){
-        throw new AppError("User is not registered", 400);
+        throw new AppError("Invalid Credentials", 401);
     }
 
     const passwordMatch = await bcrypt.compare(password, userInfo.password);
     if(!passwordMatch){
-        throw new AppError("Unauthorized Access!!", 401);
+        throw new AppError("Invalid Credentials", 401);
     }
     
     const accessToken = generateToken.generateAccessToken(userInfo.id, userInfo.role);
     const refreshToken = generateToken.generateRefreshToken(userInfo.id, userInfo.role);
 
     const decoded = jwt.decode(refreshToken);
-
     const response = await storeInDB(userInfo.id, refreshToken, decoded.exp);
 
     return {accessToken, refreshToken};
 }
 
-const logout = async (user) => {
-    
+const logout = async (refreshToken) => {
+    const [rows] = await pool.query(
+    `DELETE FROM refresh_tokens WHERE token = ?`,
+    [refreshToken]
+  );
+  if(rows.affectedRows === 0){
+    throw new AppError('Bad Request', 400)
+  }
+  return rows
 }
 
 const handleRefreshToken = async (token) => {

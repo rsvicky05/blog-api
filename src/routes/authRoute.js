@@ -1,16 +1,18 @@
 const express = require('express');
-const validate = require('../middlewares/validateMiddleware')
-const authenticate = require("../middlewares/authMiddleware")
+const validate = require('../middlewares/validateMiddleware');
+//const authenticate = require("../middlewares/authMiddleware");
 const router = express.Router();
 
-const {registerUser, loginUser, logoutUser, refreshTokenHandler} = require('../controller/authController');
+const {registerUser, loginUser, logoutUser, refreshTokenHandler, oAuthLogin} = require('../controller/authController');
 
-router.post('/register', validate(['first_name', 'email', 'password']), registerUser);
+router.get('/google', oAuthLogin);
 
-router.post('/login', validate(['email', 'password']), loginUser)
+router.post('/register', validate('first_name', 'email', 'password'), registerUser);
+
+router.post('/login', validate('email', 'password'), loginUser)
 
 router.delete('/logout', logoutUser);
 
-router.post('/refresh', refreshTokenHandler);
+router.get('/refresh', refreshTokenHandler);
 
 module.exports = router;

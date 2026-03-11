@@ -12,8 +12,8 @@ const postBlog = async (req, res, next) => {
 
 const getPosts = async (req, res, next) => {
     try{
-        const posts = await services.getAllPosts();
-        res.status(200).send(posts[0]);
+        const posts = await services.getPosts();
+        res.status(200).send(posts);
     }catch(err){
         next(err);
     }
@@ -23,7 +23,7 @@ const getSinglePost = async (req, res, next) => {
     try{
         const {postId} = req.params; 
         const post = await services.getPost(postId);
-        res.status(200).send(post[0]);
+        res.status(200).send(post);
     }catch(err){
         next(err);
     }

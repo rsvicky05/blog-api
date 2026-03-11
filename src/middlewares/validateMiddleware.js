@@ -1,7 +1,7 @@
 const validator = require('validator');
 const AppError = require('../utils/AppError');
 
-const validate = (requiredFields) => {
+const validate = (...requiredFields) => {
     return (req, res, next) => {
         if(!req.body){
             throw new AppError("Required Fields are missing", 400)
@@ -14,11 +14,11 @@ const validate = (requiredFields) => {
         });
         console.log(error);
         if(error.length > 0){
-            return res.status(400).send({errors: error});
+            return res.status(422).send({errors: error});
         }
 
         if(requiredFields.includes('email') && req.body.email && !validator.isEmail(req.body.email)){
-            throw new AppError("Email Address is Invalid", 400);
+            throw new AppError("Email Address is Invalid", 422);
         }
 
         next();
