@@ -28,8 +28,8 @@ const register = async ({first_name, last_name, email, password, role}) => {
         'user'
     )
     
-    const accessToken = generateToken.generateAccessToken(user.id, user.role);
-    const refreshToken = generateToken.generateRefreshToken(user.id, user.role);
+    const accessToken = generateToken.generateAccessToken(user);
+    const refreshToken = generateToken.generateRefreshToken(user);
 
     const decoded = jwt.decode(refreshToken);
     const response = await storeInDB(user.id, refreshToken, decoded.exp);
@@ -51,8 +51,8 @@ const login = async ({email, password}) => {
         throw new AppError("Invalid Credentials", 401);
     }
     
-    const accessToken = generateToken.generateAccessToken(userInfo.id, userInfo.role);
-    const refreshToken = generateToken.generateRefreshToken(userInfo.id, userInfo.role);
+    const accessToken = generateToken.generateAccessToken(userInfo);
+    const refreshToken = generateToken.generateRefreshToken(userInfo);
 
     const decoded = jwt.decode(refreshToken);
     const response = await storeInDB(userInfo.id, refreshToken, decoded.exp);
@@ -84,7 +84,7 @@ const handleRefreshToken = async (token) => {
 
     const decoded = jwt.verify(token, process.env.REFRESH_SECRET_KEY);
 
-    const newAccessToken = generateToken.generateAccessToken(decoded.id, decoded.role)
+    const newAccessToken = generateToken.generateAccessToken(decoded)
 
     return newAccessToken;
 }

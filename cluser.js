@@ -25,13 +25,12 @@
 
 // console.log(os.freemem() / 1024);
 
-const fs = require("fs");
+// const fs = require("fs");
 
-fs.readFile(__filename, () => {
-  console.log("file");
+// fs.readFile(__filename, () => {
+//   console.log("file");
 
-  setTimeout(() => console.log("timeout"), 0);
-});
+//   setTimeout(() => console.log("timeout"), 0);
+// });
 
-setImmediate(() => console.log("immediate"));
-
+// setImmediate(() => console.log("immediate"));

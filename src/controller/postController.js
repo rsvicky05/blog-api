@@ -32,11 +32,10 @@ const getSinglePost = async (req, res, next) => {
 const updatePost = async (req, res, next) => {
     try{
         const {postId} = req.params;
-        const isAppend = Boolean(req.query.append);
-        const {content} = req.body;
+        const {content, title, image} = req.body;
         const userId = req.user.id;
         console.log(userId)
-        const response = await services.update(userId, postId, content, isAppend);
+        const response = await services.update(userId, postId, title, content, image);
         res.status(200).send("Successfully updated the post");
     }catch(err){
         next(err);

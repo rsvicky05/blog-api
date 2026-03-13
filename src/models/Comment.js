@@ -12,7 +12,7 @@ const createComment = async (postId, userId, content) => {
 
 const getCommentsByPost = async (postId) => {
   const [rows] = await pool.query(
-    `SELECT c.id, c.comment, c.created_at, u.first_name
+    `SELECT c.id, c.comment, c.created_at, u.first_name, u.last_name
      FROM comments c
      JOIN users u ON c.user_id = u.id
      WHERE c.post_id = ?

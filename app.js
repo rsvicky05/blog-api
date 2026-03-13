@@ -2,7 +2,6 @@ const express = require('express');
 const cookieParser = require('cookie-parser')
 const cors = require('cors');
 const path = require('path');
-const authMiddleware = require('./src/middlewares/authMiddleware');
 const handleError = require('./src/middlewares/errorMiddleware');
 const {authLimiter, userLimiter} = require('./src/middlewares/rateLimiterMiddleware');
 const app = express();
@@ -14,14 +13,14 @@ app.use(express.json(), cookieParser(), cors({
     credentials: true
 }))
 
-app.use("/uploads",express.static(path.join(__dirname, "uploads")))
+//app.use("/uploads",express.static(path.join(__dirname, "uploads")))
 
 
 app.use('/api/auth', authLimiter, require('./src/routes/authRoute'));
 
-app.use('/api/posts', authMiddleware, userLimiter, require('./src/routes/postRoute'))
+app.use('/api/posts', userLimiter, require('./src/routes/postRoute'))
 
-app.use('/api/upload', authMiddleware,  userLimiter, require('./src/routes/uploadRoute'))
+//app.use('/api/upload', authMiddleware,  userLimiter, require('./src/routes/uploadRoute'))
 
 app.use(handleError);
 

@@ -9,7 +9,7 @@ const userLimiter = rateLimit({
     },
     keyGenerator: (req) => {
         if (req.user) return String(req.user.id);
-        return ipKeyGenerator(req)
+        return ipKeyGenerator(req.ip)
     },
     standardHeaders: 'draft-8',
     legacyHeaders: false

@@ -36,7 +36,7 @@ const getPost = async (id) => {
     return response[0];
 }
 
-const update = async (userId, postId, content, isAppend) => {
+const update = async (userId, postId, title, content, image) => {
     if(!postId){
         throw new AppError('Post Id is missing', 400);
     }
@@ -46,15 +46,7 @@ const update = async (userId, postId, content, isAppend) => {
         throw new AppError("Post Not Found", 404);
     }
 
-    let prevContent = "";
-    if(isAppend){
-        prevContent = post[0].content;
-    }else{
-        prevContent = "";
-    }
-
-    prevContent = prevContent +  " " + content;
-    const res = await updatePostInDB(userId, postId, prevContent);
+    const res = await updatePostInDB(userId, postId, title, content, image);
 
     if(res.affectedRows === 0){
         throw new AppError('Access Denied', 403);

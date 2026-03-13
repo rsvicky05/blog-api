@@ -8,23 +8,35 @@ const createPost = async (id, title, content) => {
 }
 
 const getAllPosts = async () => {
-    const res = await pool.query(`SELECT content FROM posts`);
+    const res = await pool.query(`select posts.id, posts.title, posts.content, posts.image, posts.created_at, users.first_name, users.last_name from posts Join users on posts.user_id = users.id;`);
     return res[0];
 }
 
 const getPostfromDB = async (id) => {
-    const [res] = await pool.query('SELECT content FROM posts WHERE id = ?', [id]);
+    await pool.query(
+    "UPDATE posts SET views = views + 1 WHERE id = ?",
+    [id]
+    );
+
+    const [res] = await pool.query('SELECT posts.id, posts.title, posts.content, posts.image, posts.created_at, users.first_name, users.last_name from posts Join users on posts.user_id = users.id WHERE posts.id = ?', [id]);
+    
     return res;
 }
 
-const updatePostInDB = async (userId, postId, content) => {
-    const [res] = await pool.query(`UPDATE posts SET content= ? WHERE id = ? AND user_id = ?`, [content, postId, userId]);
+const updatePostInDB = async (userId, postId, title, content, image) => {
+    const [res] = await pool.query(`UPDATE posts SET title=?, content= ?, image=? WHERE id = ? AND user_id = ?`, [title, content, image, postId, userId]);
     return res;
 }
 
 const getMyPosts = async (userId) => {
-    const [res] = await pool.query(`SELECT content FROM posts WHERE user_id = ?`, [userId]);
-    return res;
+    const [res] = await pool.query(`SELECT * FROM posts WHERE user_id = ?`, [userId]);
+    const [[views]] = await pool.query(
+        `SELECT SUM(views) AS totalViews 
+         FROM posts 
+         WHERE user_id = ?`,
+        [userId]
+    );
+    return {post: res, views};
 }
 
 const deletePostInDB = async (userId, postId) => {

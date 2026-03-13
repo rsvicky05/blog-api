@@ -3,12 +3,17 @@ const {postBlog, getSinglePost, deletePost, updatePost, getPosts, getMinePosts} 
 const validate = require("../middlewares/validateMiddleware");
 const authorize = require("../middlewares/roleMiddleware");
 const comments = require('./commentRoute');
+const authMiddleware = require('../middlewares/authMiddleware');
+
 const router = express.Router();
 
 //Users
+router.get('/feed', getPosts);
+
+router.use(authMiddleware);
+
 router.post('/', validate(['content']), postBlog);
 
-router.get('/feed', getPosts);
 router.get('/mine', getMinePosts);
 
 router.get('/:postId', getSinglePost);
