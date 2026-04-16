@@ -4,8 +4,8 @@ const AppError = require('../utils/AppError');
 const userLimiter = rateLimit({
     windowMs: 60 * 1000,
     max: (req) => {
-        if (req.user?.role === 'admin') return 6;
-        return 30;
+        if (req.user?.role === 'admin') return 10;
+        return 5;
     },
     keyGenerator: (req) => {
         if (req.user) return String(req.user.id);

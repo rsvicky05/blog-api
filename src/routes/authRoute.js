@@ -5,7 +5,7 @@ const router = express.Router();
 
 const {registerUser, loginUser, logoutUser, refreshTokenHandler, oAuthLogin} = require('../controller/authController');
 
-//router.get('/google', oAuthLogin);
+router.post('/google', oAuthLogin);
 
 router.post('/register', validate('first_name', 'email', 'password'), registerUser);
 

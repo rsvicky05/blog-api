@@ -13,8 +13,7 @@ app.use(express.json(), cookieParser(), cors({
     credentials: true
 }))
 
-//app.use("/uploads",express.static(path.join(__dirname, "uploads")))
-
+app.use("/uploads",express.static(path.join(__dirname, "uploads")));
 
 app.use('/api/auth', authLimiter, require('./src/routes/authRoute'));
 

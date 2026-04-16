@@ -12,7 +12,8 @@ const postBlog = async (req, res, next) => {
 
 const getPosts = async (req, res, next) => {
     try{
-        const posts = await services.getPosts();
+        const params = req.query;
+        const posts = await services.getPosts(params);
         res.status(200).send(posts);
     }catch(err){
         next(err);

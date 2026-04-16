@@ -1,5 +1,6 @@
 const {createPost, getAllPosts, getPostfromDB, updatePostInDB, deletePostInDB, deleteAnyPostInDB, getMyPosts} = require("../models/Post.js");
 const cacheClient = require('../config/redis.js');
+const client = require('../config/elastic.js')
 const AppError = require("../utils/AppError.js");
 const sendMail = require('../utils/mailSender.js')
 
@@ -8,6 +9,7 @@ const create = async ({id} , {title, content}) => {
         throw new AppError('Required fields are missing', 400)
     }
     const response = await createPost(id, title, content);
+
     sendMail("vigneshvicky09072005@gmail.com", title, content);
 
     return response;
@@ -25,7 +27,6 @@ const getPost = async (id) => {
         return JSON.parse(data);
     }
 
-    
     const response = await getPostfromDB(id);
     if(response.length <= 0){
         throw new AppError('Post Not found', 404);
@@ -47,6 +48,7 @@ const update = async (userId, postId, title, content, image) => {
     }
 
     const res = await updatePostInDB(userId, postId, title, content, image);
+    
 
     if(res.affectedRows === 0){
         throw new AppError('Access Denied', 403);
@@ -54,16 +56,17 @@ const update = async (userId, postId, title, content, image) => {
     return res;
 }
 
-const getPosts = async () => {
-
+const getPosts = async (query) => {
     const cacheKey = 'posts';
     const data = await cacheClient.get(cacheKey);
-
+    const limit = +query.limit || 3;
+    const page = +query.page || 1;
+    const offset = (page - 1) * limit;
     if(data){
         return JSON.parse(data);
     }
 
-    const res = await getAllPosts();
+    const res = await getAllPosts(limit, offset);
     await cacheClient.setEx(cacheKey, 10, JSON.stringify(res));
     return res;
 }

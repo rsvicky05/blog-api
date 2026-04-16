@@ -20,8 +20,7 @@ const registerUser = async (req, res, next) => {
         res.status(201).json({token, message: "User Registered Successfully"});
     }catch(err){
         next(err)
-    }
-    
+    }   
 }
 
 const loginUser = async (req, res, next) => {
@@ -83,6 +82,7 @@ const refreshTokenHandler = async (req, res, next) => {
 
 const oAuthLogin = async (req, res, next) =>{
     try{
+        console.log(req.query.code)
         res.send("OAuth Login Page")
     }catch(err){
         next(err)
